@@ -1,5 +1,5 @@
 from flask import Flask,escape,url_for,render_template
-app=Flask(__name__)
+
 name = 'Grey Li'
 movies = [
     {'title': 'My Neighbor Totoro', 'year': '1988'},
@@ -14,19 +14,9 @@ movies = [
     {'title': 'The Pork of Music', 'year': '2012'},
 ]
 #装饰器为这个函数绑定url，访问时触发这个函数的返回值
+app=Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html',name=name,movies=movies)
 
-@app.route('/user/<name>')
-def user_page(name):
-    return 'user: %s' % escape(name)
-
-@app.route('/test')
-def test_url_for():
-    print(url_for('hello'))
-    print(url_for('user_page',name='grey'))
-    print(url_for('test_url_for'))
-    print(url_for('test_url_for',num=2))
-    return 'test page'
 
