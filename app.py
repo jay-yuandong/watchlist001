@@ -1,4 +1,4 @@
-from flask import Flask,render_template
+from flask import Flask,render_template,request,redirect,flash,url_for
 from flask_sqlalchemy import SQLAlchemy
 import os,sys,click
 app=Flask(__name__)
@@ -13,6 +13,7 @@ app.config['SQLALCHEMY_DATABASE_URI']=prefix+os.path.join(app.root_path,'data.db
 #关闭对模型修改的监控
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 #装饰器为这个函数绑定url，访问时触发这个函数的返回值
+app.config['SECRET_KEY']='dev'
 
 #初始化扩展，传入程序实例app
 db=SQLAlchemy(app)
@@ -59,10 +60,22 @@ def inject_user():
     print(user)
     return dict(user=user)
 
-@app.route('/')
+@app.route('/',methods=['GET','POST'])
 def index():
+    #创建电影
+    if request.method=='POST':
+        #获取前端输入的信息
+        title=request.form.get('title')
+        year=request.form.get('year')
+        if not title or not year or len(year)>4 or len(title)>60:
+            flash('Invalid input') #flash一个错误提示
+            return redirect(url_for('index')) #返回重定向的index页
+        movie=Movie(title=title,year=year) #创建提交的信息
+        db.session.add(movie)
+        db.session.commit()
+        flash('Item created')
+        return redirect(url_for('index'))
     movies=Movie.query.all()
-    print(len(movies))
     return render_template('index.html',movies=movies)
 
 #注册一个错误处理函数,404错误会触发
@@ -70,5 +83,30 @@ def index():
 def page_not_found(e):
     return render_template('404.html'),404
 
+#编辑电影
+@app.route('/moive/edit/<int:movie_id>',methods=['GET','POST'])
+def edit(movie_id):
+    #没有找到，则返回 404 错误响应
+    movie=Movie.query.get_or_404(movie_id)
+    if request.method=='POST':
+        title=request.form['title']
+        year=request.form['year']
+        if not title or not year or len(year)>4 or len(title)>60:
+            flash('Invalid input')
+            return redirect(url_for('edit',movie_id=movie_id))
+        movie.title=title
+        movie.year=year
+        db.session.commit()
+        flash('Item update')
+        return redirect(url_for('index'))
+    return render_template('edit.html',movie=movie)
 
+#删除电影
+@app.route('/movie/delete/<int:movie_id>',methods=['POST'])
+def delete(movie_id):
+    movie=Movie.query.get_or_404(movie_id)
+    db.session.delete(movie)
+    db.session.commit()
+    flash('Item deleted.')
+    return redirect(url_for('index'))
 
