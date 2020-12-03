@@ -52,11 +52,23 @@ def forge():
     db.session.commit()
     click.echo('done.')
 
+#上下文处理函数
+@app.context_processor
+def inject_user():
+    user=User.query.first()
+    print(user)
+    return dict(user=user)
 
 @app.route('/')
 def index():
-    user=User.query.first()
     movies=Movie.query.all()
-    return render_template('index,html',user=user,movie=movies)
+    print(len(movies))
+    return render_template('index.html',movies=movies)
+
+#注册一个错误处理函数,404错误会触发
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'),404
+
 
 
