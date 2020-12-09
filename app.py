@@ -70,7 +70,7 @@ def forge():
         movie=Movie(title=m['title'],year=m['year'])
         db.session.add(movie)
     db.session.commit()
-    click.echo('done.')
+    click.echo('Done.')
 
 #用于修改表结构后的命令
 @app.cli.command()
@@ -80,7 +80,7 @@ def initdb(drop):
     if drop:
         db.drop_all()
     db.create_all()
-    click.echo('Initialized datebase.')
+    click.echo('Initialized database.')
 
 @app.cli.command()
 @click.option('--username',prompt=True,help='The username used to login.')
@@ -90,11 +90,11 @@ def admin(username,password):
     db.create_all()
     user=User.query.first()
     if user is not None:
-        click.echo('Updating user')
+        click.echo('Updating user...')
         user.username=username
         user.set_password(password)
     else:
-        click.echo('Creating user')
+        click.echo('Creating user...')
         user=User(username=username)
         user.set_password(password)
         db.session.add(user)
@@ -105,7 +105,6 @@ def admin(username,password):
 @app.context_processor
 def inject_user():
     user=User.query.first()
-    print(user)
     return dict(user=user)
 
 @app.route('/',methods=['GET','POST'])
@@ -126,7 +125,6 @@ def index():
         flash('Item created')
         return redirect(url_for('index'))
     movies=Movie.query.all()
-    print(movies)
     return render_template('index.html',movies=movies)
 
 #注册一个错误处理函数,404错误会触发
@@ -135,7 +133,7 @@ def page_not_found(e):
     return render_template('404.html'),404
 
 #编辑电影
-@app.route('/moive/edit/<int:movie_id>',methods=['GET','POST'])
+@app.route('/movie/edit/<int:movie_id>',methods=['GET','POST'])
 @login_required
 def edit(movie_id):
     #没有找到，则返回 404 错误响应
