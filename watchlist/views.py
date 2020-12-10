@@ -15,7 +15,7 @@ def index():
         title=request.form['title']
         year=request.form['year']
         #判断请求中的信息是否符合要求
-        if not title or not len(year)>4 or len(title)>60:
+        if not title or not year or  len(year)>4 or len(title)>60:
             flash('Invalid input.')
             return redirect(url_for('index'))
 
@@ -76,6 +76,7 @@ def settings():
         db.session.commit()
         flash('Settings updated.')
         return redirect(url_for('index'))
+    return render_template('settings.html')
 
 #登录按钮
 @app.route('/login',methods=['GET','POST'])
@@ -95,7 +96,7 @@ def login():
             flash('Login success.')
             return redirect(url_for('index'))
         #否则继续登录
-        flash('Invalid username or password')
+        flash('Invalid username or password.')
         return redirect(url_for('login'))
     return render_template('login.html')
 

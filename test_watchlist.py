@@ -1,7 +1,9 @@
 #watchlist的单元测试
 
 import unittest
-from app import app,db,Movie,User,forge,initdb
+from watchlist import app,db
+from watchlist.models import Movie,User
+from watchlist.commands import forge,initdb
 
 class WacthlistTestCase(unittest.TestCase):
     def setUp(self):
@@ -63,7 +65,7 @@ class WacthlistTestCase(unittest.TestCase):
                                   data=dict(title='New Movie',year='2019'),
                                   follow_redirects=True)
         data=response.get_data(as_text=True)
-        self.assertIn('Item created',data)
+        self.assertIn('Item created.',data)
         self.assertIn('New Movie',data)
 
         #创建信息电影名为空测试
@@ -97,11 +99,11 @@ class WacthlistTestCase(unittest.TestCase):
             year='2019'
         ), follow_redirects=True)
         data = response.get_data(as_text=True)
-        self.assertIn('Item updated.', data)
+        self.assertIn('Item update.', data)
         self.assertIn('New Movie Edited', data)
 
         #更新测试，但标题为空
-        response = self.client.get('/movie/edit/1',
+        response = self.client.post('/movie/edit/1',
                                    data=dict(title='', year='2019'),
                                    follow_redirects=True)
         data = response.get_data(as_text=True)
@@ -109,7 +111,7 @@ class WacthlistTestCase(unittest.TestCase):
         self.assertIn('Invalid input',data)
 
         #更新测试，年份为空
-        response = self.client.get('/movie/edit/1',
+        response = self.client.post('/movie/edit/1',
                                    data=dict(title='New Movie Edit Again', year=''),
                                    follow_redirects=True)
         data = response.get_data(as_text=True)
@@ -153,7 +155,7 @@ class WacthlistTestCase(unittest.TestCase):
                                   follow_redirects=True)
         data=response.get_data(as_text=True)
         self.assertNotIn('Login success.', data)
-        self.assertIn('Invalid username or password.', data)
+        self.assertIn('Invalid username or password', data)
 
         # 测试使用错误的用户名登录
         response = self.client.post('/login', data=dict(
@@ -162,7 +164,7 @@ class WacthlistTestCase(unittest.TestCase):
         ), follow_redirects=True)
         data = response.get_data(as_text=True)
         self.assertNotIn('Login success.', data)
-        self.assertIn('Invalid username or password.', data)
+        self.assertIn('Invalid username or password', data)
         # 测试使用空用户名登录
         response = self.client.post('/login', data=dict(
             username='',
